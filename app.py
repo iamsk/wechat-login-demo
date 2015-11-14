@@ -35,7 +35,7 @@ def get_user_info(token, openid):
     return ret.json()
 
 
-@app.route("/login_wechat")
+@app.route("/login_wechat", methods=['POST'])
 def login():
     code = request.form.get('code', '')
     if not code:
@@ -43,8 +43,9 @@ def login():
     access_token = get_access_token_by_code(code)
     openid = access_token['openid']
     user_info = get_user_info(access_token['access_token'], access_token['openid'])
-    user = User.objects.get(openid=openid)
-    if user:
+    users = User.objects.filter(openid=openid)
+    if users:
+        user = users[0]
         user.access_token = access_token
         user.user_info = user_info
         uid = user.uid
@@ -55,16 +56,16 @@ def login():
     return jsonify({'uid': uid})
 
 
-@app.route("/self")
+@app.route("/self", methods=['GET', 'POST'])
 def get_user():
     uid = request.args.get('uid', '') or request.form.get('uid', '')
     if not uid:
         return jsonify({})
-    user = User.objects.get(uid=uid)
-    if not user:
+    users = User.objects.filter(uid=uid)
+    if not users:
         return jsonify({})
     wanted_keys = ('province', 'openid', 'headimgurl', 'city', 'country', 'nickname', 'sex')
-    profile = dict_filter(user.data, wanted_keys)
+    profile = dict_filter(users[0].data, wanted_keys)
     profile['uid'] = uid
     profile['phone'] = ''
     profile['email'] = ''
