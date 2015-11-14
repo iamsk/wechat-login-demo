@@ -50,7 +50,7 @@ def login():
         user.user_info = user_info
         uid = user.uid
     else:
-        uid = uuid.uuid5('bike', openid)
+        uid = str(uuid.uuid5(uuid.NAMESPACE_DNS, openid.encode('utf-8')))
         user = User(openid=openid, access_token=access_token, user_info=user_info, uid=uid)
     user.save()
     return jsonify({'uid': uid})
@@ -65,7 +65,7 @@ def get_user():
     if not users:
         return jsonify({})
     wanted_keys = ('province', 'openid', 'headimgurl', 'city', 'country', 'nickname', 'sex')
-    profile = dict_filter(users[0].data, wanted_keys)
+    profile = dict_filter(users[0].user_info, wanted_keys)
     profile['uid'] = uid
     profile['phone'] = ''
     profile['email'] = ''
@@ -78,4 +78,4 @@ def get_user():
     return jsonify(profile)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8998, debug=True)
+    app.run(host='0.0.0.0', port=8998)
