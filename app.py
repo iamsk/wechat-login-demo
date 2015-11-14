@@ -1,6 +1,6 @@
 import uuid
 import requests
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_mongoengine import MongoEngine
 
 from config import APP_ID, APP_SECRET
@@ -39,7 +39,7 @@ def get_user_info(token, openid):
 def login():
     code = request.form.get('code', '')
     if not code:
-        return {}
+        return jsonify({})
     access_token = get_access_token_by_code(code)
     openid = access_token['openid']
     user_info = get_user_info(access_token['access_token'], access_token['openid'])
@@ -52,17 +52,17 @@ def login():
         uid = uuid.uuid5('bike', openid)
         user = User(openid=openid, access_token=access_token, user_info=user_info, uid=uid)
     user.save()
-    return {'uid': uid}
+    return jsonify({'uid': uid})
 
 
 @app.route("/self")
 def get_user():
     uid = request.args.get('uid', '') or request.form.get('uid', '')
     if not uid:
-        return {}
+        return jsonify({})
     user = User.objects.get(uid=uid)
     if not user:
-        return {}
+        return jsonify({})
     wanted_keys = ('province', 'openid', 'headimgurl', 'city', 'country', 'nickname', 'sex')
     profile = dict_filter(user.data, wanted_keys)
     profile['uid'] = uid
@@ -74,7 +74,7 @@ def get_user():
     profile['equipment'] = ''
     profile['headline'] = ''
     profile['background'] = ''
-    return profile
+    return jsonify(profile)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host='0.0.0.0', port=8998, debug=True)
