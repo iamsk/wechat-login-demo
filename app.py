@@ -66,6 +66,7 @@ def get_user():
         return jsonify({})
     wanted_keys = ('province', 'openid', 'headimgurl', 'city', 'country', 'nickname', 'sex')
     profile = dict_filter(users[0].user_info, wanted_keys)
+    profile['nickname'] = profile['nickname'].encode('utf-8')
     profile['uid'] = uid
     profile['phone'] = ''
     profile['email'] = ''
