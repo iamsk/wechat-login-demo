@@ -30,7 +30,7 @@ def get_access_token_by_code(code):
 
 
 def get_user_info(token, openid):
-    user_info_url = 'https://api.weixin.qq.com/sns/userinfo?access_token={token}&openid={openid}'
+    user_info_url = 'https://api.weixin.qq.com/sns/userinfo?access_token={token}&openid={openid}&lang=zh_CN'
     ret = requests.get(user_info_url.format(token=token, openid=openid))
     return ret.json()
 
